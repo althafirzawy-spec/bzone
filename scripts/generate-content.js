@@ -329,10 +329,27 @@ async function main() {
       }
     }
 
-    // Baca keywords dari environment variable atau file
-    // Support format: dipisah koma (untuk env var) atau newline (untuk file)
+    // Baca keywords: PRIORITAS keyword.txt dari GitHub, fallback ke environment variable
+    // Support format: newline untuk file, koma untuk env var
     let keywords = [];
-    if (process.env.KEYWORDS) {
+    
+    // PRIORITAS 1: Cek keyword.txt dari GitHub (lebih mudah untuk update)
+    try {
+      const keywordsContent = await fs.readFile(KEYWORD_PATH, "utf-8");
+      const fileKeywords = keywordsContent.trim().split('\n').map(k => k.trim()).filter(k => k.length > 0);
+      if (fileKeywords.length > 0) {
+        keywords = fileKeywords;
+        console.log(`[INFO] Menggunakan keywords dari keyword.txt (${keywords.length} keyword(s)).`);
+      } else {
+        console.log("[INFO] keyword.txt ditemukan tapi kosong, mencoba environment variable...");
+      }
+    } catch (error) {
+      // File tidak ditemukan, lanjut ke environment variable
+      console.log("[INFO] keyword.txt tidak ditemukan, mencoba environment variable...");
+    }
+    
+    // PRIORITAS 2: Fallback ke environment variable jika keyword.txt tidak ada atau kosong
+    if (keywords.length === 0 && process.env.KEYWORDS) {
       console.log("[INFO] Menggunakan KEYWORDS dari environment variable.");
       const keywordsContent = process.env.KEYWORDS.trim();
       // Support koma atau newline sebagai pemisah
@@ -346,15 +363,11 @@ async function main() {
           keywords = [keywordsContent];
         }
       }
-    } else {
-      try {
-        const keywordsContent = await fs.readFile(KEYWORD_PATH, "utf-8");
-        keywords = keywordsContent.trim().split('\n').map(k => k.trim()).filter(k => k.length > 0);
-        console.log("[INFO] Menggunakan keywords dari keyword.txt.");
-      } catch (error) {
-        console.warn("[WARN] KEYWORDS tidak ditemukan di environment variable dan keyword.txt tidak ditemukan. Tidak ada keyword untuk diproses.");
-        keywords = [];
-      }
+    }
+    
+    // Jika masih tidak ada keywords
+    if (keywords.length === 0) {
+      console.warn("[WARN] KEYWORDS tidak ditemukan di keyword.txt maupun environment variable. Tidak ada keyword untuk diproses.");
     }
     
     if (keywords.length > 0) {

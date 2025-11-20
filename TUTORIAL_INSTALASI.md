@@ -169,8 +169,8 @@ Buka file-file berikut dan catat isinya:
 ### Langkah 2: Script Sudah Mendukung Environment Variables
 
 **✅ Script `generate-content.js` sudah dimodifikasi** untuk mendukung environment variables! Script akan otomatis:
-1. Mencoba membaca dari environment variables terlebih dahulu (`GEMINI_API_KEY`, `PEXELS_API_KEY`, `KEYWORDS`)
-2. Jika tidak ditemukan, fallback ke file lokal (`apikey.txt`, `pexels_apikey.txt`, `keyword.txt`)
+1. **Untuk API Keys**: Mencoba membaca dari environment variables terlebih dahulu (`GEMINI_API_KEY`, `PEXELS_API_KEY`), jika tidak ditemukan fallback ke file lokal
+2. **Untuk Keywords**: **PRIORITAS keyword.txt dari GitHub** (lebih mudah update), jika tidak ada baru menggunakan environment variable `KEYWORDS`
 
 Ini berarti Anda bisa menggunakan environment variables di Cloudflare Pages tanpa perlu memodifikasi script lagi.
 
@@ -306,10 +306,15 @@ KEYWORDS = how to make pink food color,how to make crystal with borax,how to mea
 ```
 
 **Catatan:**
+- **PRIORITAS**: Script akan membaca `keyword.txt` dari GitHub **TERLEBIH DAHULU**
+- Jika `keyword.txt` tidak ada atau kosong, baru akan menggunakan environment variable `KEYWORDS`
 - Setiap keyword akan digunakan untuk generate satu artikel
 - Script akan skip keyword yang sudah memiliki artikel (berdasarkan slug)
-- Script akan otomatis menggunakan `keyword.txt` jika ada, jika tidak baru cek environment variable `KEYWORDS`
 - Jika tidak ada keduanya, script akan tetap berjalan tapi tidak generate artikel baru
+
+**💡 Tips:**
+- **Hapus environment variable `KEYWORDS`** di Cloudflare jika Anda ingin menggunakan `keyword.txt` dari GitHub
+- Atau biarkan environment variable kosong, script akan otomatis menggunakan `keyword.txt`
 
 **Cara menambahkan:**
 1. Klik **"Add variable"**
