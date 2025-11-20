@@ -330,19 +330,35 @@ async function main() {
     }
 
     // Baca keywords dari environment variable atau file
+    // Support format: dipisah koma (untuk env var) atau newline (untuk file)
     let keywords = [];
     if (process.env.KEYWORDS) {
       console.log("[INFO] Menggunakan KEYWORDS dari environment variable.");
-      keywords = process.env.KEYWORDS.split('\n').filter(k => k.trim());
+      const keywordsContent = process.env.KEYWORDS.trim();
+      // Support koma atau newline sebagai pemisah
+      if (keywordsContent.includes(',')) {
+        keywords = keywordsContent.split(',').map(k => k.trim()).filter(k => k.length > 0);
+      } else if (keywordsContent.includes('\n')) {
+        keywords = keywordsContent.split('\n').map(k => k.trim()).filter(k => k.length > 0);
+      } else {
+        // Single keyword
+        if (keywordsContent.length > 0) {
+          keywords = [keywordsContent];
+        }
+      }
     } else {
       try {
         const keywordsContent = await fs.readFile(KEYWORD_PATH, "utf-8");
-        keywords = keywordsContent.trim().split('\n').filter(k => k.trim());
+        keywords = keywordsContent.trim().split('\n').map(k => k.trim()).filter(k => k.length > 0);
         console.log("[INFO] Menggunakan keywords dari keyword.txt.");
       } catch (error) {
         console.warn("[WARN] KEYWORDS tidak ditemukan di environment variable dan keyword.txt tidak ditemukan. Tidak ada keyword untuk diproses.");
         keywords = [];
       }
+    }
+    
+    if (keywords.length > 0) {
+      console.log(`[INFO] Ditemukan ${keywords.length} keyword(s) untuk diproses.`);
     }
     let allArticles = await fs.readFile(OUTPUT_PATH, "utf-8").then(JSON.parse).catch(() => []);
 

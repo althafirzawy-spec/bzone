@@ -30,8 +30,9 @@ Di halaman project Cloudflare Pages → **Settings** → **Environment variables
 
 | Variable | Value | Environment |
 |----------|-------|-------------|
-| `GEMINI_API_KEY` | (dari `apikey.txt`) | Production, Preview |
+| `GEMINI_API_KEY` | (dari `apikey.txt`, bisa multiple dipisah koma) | Production, Preview |
 | `PEXELS_API_KEY` | (dari `pexels_apikey.txt`) | Production, Preview |
+| `KEYWORDS` | (opsional - lebih baik gunakan `keyword.txt` di GitHub) | Production, Preview |
 | `BACKDATE_DAYS` | `3` | Production, Preview |
 | `FUTURE_SCHEDULE_DAYS` | `30` | Production, Preview |
 | `NODE_VERSION` | `20` | Production, Preview |

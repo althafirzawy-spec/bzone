@@ -128,9 +128,9 @@ Jika ingin lebih aman, bisa setup SSH key:
 File `.gitignore` sudah disediakan di proyek ini dan akan otomatis mengabaikan file-file sensitif. Pastikan file `.gitignore` sudah ada sebelum melakukan commit pertama.
 
 File `.gitignore` yang sudah dibuat berisi:
-- `apikey.txt`
-- `pexels_apikey.txt`
-- `keyword.txt`
+- `apikey.txt` - **TIDAK** di-commit (informasi sensitif)
+- `pexels_apikey.txt` - **TIDAK** di-commit (informasi sensitif)
+- `keyword.txt` - **BISA** di-commit (bukan informasi sensitif, lebih mudah untuk update)
 - `node_modules/`
 - `.env` dan file environment lainnya
 - `dist/`
@@ -142,7 +142,7 @@ Jika file sensitif sudah ter-commit sebelumnya, hapus dari history:
 # Hapus file dari git tracking (tapi tetap di local)
 git rm --cached apikey.txt
 git rm --cached pexels_apikey.txt
-git rm --cached keyword.txt
+# keyword.txt TIDAK perlu dihapus karena bisa di-commit
 
 # Commit perubahan
 git commit -m "Remove sensitive files from git"
@@ -234,6 +234,7 @@ Klik **"Add variable"** dan tambahkan variabel berikut:
 | `VITE_SITE_URL` | `https://bzone.pages.dev` (opsional) | Production, Preview |
 | `VITE_OG_TITLE` | `Blog` (opsional) | Production, Preview |
 | `VITE_OG_DESCRIPTION` | `Blog Description` (opsional) | Production, Preview |
+| `KEYWORDS` | (keywords untuk generate artikel, dipisah koma) - **OPSIONAL**, lebih baik gunakan `keyword.txt` di GitHub | Production, Preview |
 
 **💡 Format GEMINI_API_KEY untuk Multiple Keys:**
 
@@ -262,6 +263,53 @@ GEMINI_API_KEY = AIzaSy1234567890abcdef,AIzaSy0987654321fedcba
 ```
 
 Script akan otomatis mendeteksi dan menggunakan semua keys secara bergantian jika salah satu mencapai rate limit.
+
+**💡 Format KEYWORDS untuk Generate Artikel:**
+
+Untuk generate artikel, Anda perlu memasukkan keywords. Ada **2 cara** untuk menyimpan keywords:
+
+### **Cara 1: Simpan di GitHub (RECOMMENDED - Lebih Mudah Update)**
+
+**✅ Keyword.txt BISA di-commit ke GitHub** karena bukan informasi sensitif. Ini cara yang lebih mudah untuk update keywords.
+
+1. Edit file `keyword.txt` di local (satu keyword per baris):
+   ```
+   how to make pink food color
+   how to make crystal with borax
+   how to measure shaft length on outboard
+   how to get to salem ma from boston
+   how to plant flowers in pot
+   how to print a book from word
+   ```
+
+2. Commit dan push ke GitHub:
+   ```bash
+   git add keyword.txt
+   git commit -m "Update keywords"
+   git push origin main
+   ```
+
+3. Script akan otomatis membaca dari `keyword.txt` saat build di Cloudflare.
+
+**Keuntungan:**
+- ✅ Lebih mudah update (edit file → commit → push)
+- ✅ Version control (bisa lihat history perubahan)
+- ✅ Tidak perlu akses Cloudflare dashboard untuk update
+
+### **Cara 2: Simpan di Cloudflare Environment Variable**
+
+Jika Anda lebih suka menggunakan environment variable:
+
+**Format di Cloudflare (dipisah koma):**
+```
+KEYWORDS = how to make pink food color,how to make crystal with borax,how to measure shaft length on outboard,how to get to salem ma from boston,how to plant flowers in pot
+```
+
+**Catatan:**
+- Setiap keyword akan digunakan untuk generate satu artikel
+- Script akan skip keyword yang sudah memiliki artikel (berdasarkan slug)
+- Script akan otomatis menggunakan `keyword.txt` jika ada, jika tidak baru cek environment variable `KEYWORDS`
+- Jika tidak ada keduanya, script akan tetap berjalan tapi tidak generate artikel baru
 
 **Cara menambahkan:**
 1. Klik **"Add variable"**
@@ -471,10 +519,29 @@ git push origin main
 2. Edit atau tambah variable
 3. Trigger deployment baru (atau tunggu commit berikutnya)
 
-### Untuk Generate Content Baru:
-1. Update `keyword.txt` (jika menggunakan file)
-2. Atau trigger manual di Cloudflare (jika ada script khusus)
-3. Build akan otomatis generate content baru
+### Untuk Generate Content Baru (Update Keywords):
+**Cara Termudah - Update via GitHub:**
+
+1. Edit file `keyword.txt` di local (satu keyword per baris):
+   ```
+   how to make pink food color
+   how to make crystal with borax
+   keyword baru 1
+   keyword baru 2
+   ```
+
+2. Commit dan push:
+   ```bash
+   git add keyword.txt
+   git commit -m "Add new keywords"
+   git push origin main
+   ```
+
+3. Cloudflare akan otomatis build dan generate artikel untuk keywords baru
+
+**Atau via Cloudflare Environment Variable:**
+1. Update `KEYWORDS` di Cloudflare Pages → Settings → Environment variables
+2. Trigger deployment baru
 
 ---
 

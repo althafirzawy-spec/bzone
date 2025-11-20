@@ -20,7 +20,7 @@ build/
 # API Keys dan file sensitif
 apikey.txt
 pexels_apikey.txt
-keyword.txt
+# keyword.txt - BISA di-commit karena bukan informasi sensitif
 
 # Logs
 npm-debug.log*
