@@ -9,6 +9,25 @@ const PEXELS_API_KEY_PATH = path.resolve(process.cwd(), "pexels_apikey.txt");
 const KEYWORD_PATH = path.resolve(process.cwd(), "keyword.txt");
 const OUTPUT_PATH = path.resolve(process.cwd(), "public", "articles.json");
 
+// Support multiple keyword files untuk multiple projects
+// Format: keyword-{project-name}.txt (contoh: keyword-production.txt, keyword-staging.txt)
+function getKeywordFilePath() {
+  // Cek environment variable untuk project name
+  const projectName = process.env.PROJECT_NAME || 
+                      process.env.CF_PAGES_PROJECT_NAME || 
+                      process.env.CF_PAGES_BRANCH || 
+                      null;
+  
+  if (projectName) {
+    // Coba file spesifik untuk project
+    const projectKeywordPath = path.resolve(process.cwd(), `keyword-${projectName}.txt`);
+    return projectKeywordPath;
+  }
+  
+  // Fallback ke keyword.txt default
+  return KEYWORD_PATH;
+}
+
 const BACKDATE_DAYS = parseInt(process.env.BACKDATE_DAYS) || 3;
 const FUTURE_SCHEDULE_DAYS = parseInt(process.env.FUTURE_SCHEDULE_DAYS) || 30;
 const REQUEST_DELAY_MS = 10000;
@@ -329,23 +348,53 @@ async function main() {
       }
     }
 
-    // Baca keywords: PRIORITAS keyword.txt dari GitHub, fallback ke environment variable
-    // Support format: newline untuk file, koma untuk env var
+    // Baca keywords: PRIORITAS file keyword dari GitHub, fallback ke environment variable
+    // Support multiple keyword files untuk multiple projects
+    // Format: keyword-{project-name}.txt (contoh: keyword-production.txt, keyword-staging.txt)
     let keywords = [];
     
-    // PRIORITAS 1: Cek keyword.txt dari GitHub (lebih mudah untuk update)
-    try {
-      const keywordsContent = await fs.readFile(KEYWORD_PATH, "utf-8");
-      const fileKeywords = keywordsContent.trim().split('\n').map(k => k.trim()).filter(k => k.length > 0);
-      if (fileKeywords.length > 0) {
-        keywords = fileKeywords;
-        console.log(`[INFO] Menggunakan keywords dari keyword.txt (${keywords.length} keyword(s)).`);
-      } else {
-        console.log("[INFO] keyword.txt ditemukan tapi kosong, mencoba environment variable...");
+    // Tentukan file keyword yang akan digunakan
+    const projectName = process.env.PROJECT_NAME || 
+                        process.env.CF_PAGES_PROJECT_NAME || 
+                        process.env.CF_PAGES_BRANCH || 
+                        null;
+    
+    const keywordFilePath = getKeywordFilePath();
+    const keywordFileName = path.basename(keywordFilePath);
+    
+    // PRIORITAS 1: Cek file keyword spesifik untuk project (keyword-{project-name}.txt)
+    if (projectName) {
+      try {
+        const projectKeywordPath = path.resolve(process.cwd(), `keyword-${projectName}.txt`);
+        const keywordsContent = await fs.readFile(projectKeywordPath, "utf-8");
+        const fileKeywords = keywordsContent.trim().split('\n').map(k => k.trim()).filter(k => k.length > 0);
+        if (fileKeywords.length > 0) {
+          keywords = fileKeywords;
+          console.log(`[INFO] Menggunakan keywords dari keyword-${projectName}.txt (${keywords.length} keyword(s)).`);
+        } else {
+          console.log(`[INFO] keyword-${projectName}.txt ditemukan tapi kosong, mencoba keyword.txt default...`);
+        }
+      } catch (error) {
+        // File spesifik tidak ditemukan, lanjut ke keyword.txt default
+        console.log(`[INFO] keyword-${projectName}.txt tidak ditemukan, mencoba keyword.txt default...`);
       }
-    } catch (error) {
-      // File tidak ditemukan, lanjut ke environment variable
-      console.log("[INFO] keyword.txt tidak ditemukan, mencoba environment variable...");
+    }
+    
+    // PRIORITAS 2: Cek keyword.txt default jika file spesifik tidak ada atau tidak ada project name
+    if (keywords.length === 0) {
+      try {
+        const keywordsContent = await fs.readFile(KEYWORD_PATH, "utf-8");
+        const fileKeywords = keywordsContent.trim().split('\n').map(k => k.trim()).filter(k => k.length > 0);
+        if (fileKeywords.length > 0) {
+          keywords = fileKeywords;
+          console.log(`[INFO] Menggunakan keywords dari keyword.txt (${keywords.length} keyword(s)).`);
+        } else {
+          console.log("[INFO] keyword.txt ditemukan tapi kosong, mencoba environment variable...");
+        }
+      } catch (error) {
+        // File tidak ditemukan, lanjut ke environment variable
+        console.log("[INFO] keyword.txt tidak ditemukan, mencoba environment variable...");
+      }
     }
     
     // PRIORITAS 2: Fallback ke environment variable jika keyword.txt tidak ada atau kosong

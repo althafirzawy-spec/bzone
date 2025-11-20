@@ -1,0 +1,8 @@
+# Keyword file untuk Staging Project
+# Format: satu keyword per baris
+# File ini adalah contoh, rename menjadi keyword-staging.txt dan isi dengan keywords untuk testing
+
+test keyword 1
+test keyword 2
+test keyword 3
+

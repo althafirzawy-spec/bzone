@@ -1,0 +1,11 @@
+# Keyword file untuk Production Project
+# Format: satu keyword per baris
+# File ini adalah contoh, rename menjadi keyword-production.txt dan isi dengan keywords Anda
+
+how to make pink food color
+how to make crystal with borax
+how to measure shaft length on outboard
+how to get to salem ma from boston
+how to plant flowers in pot
+how to print a book from word
+

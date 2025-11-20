@@ -98,7 +98,10 @@ onMounted(() => {
 
 const md = new MarkdownIt({ html: true });
 const siteName = import.meta.env.VITE_SITE_NAME || 'KontenKit';
-const siteUrl = import.meta.env.VITE_SITE_URL || 'https://www.kontenkit.com';
+// Priority: VITE_SITE_URL > CF_PAGES_URL > default Cloudflare Pages URL
+const siteUrl = import.meta.env.VITE_SITE_URL || 
+                import.meta.env.CF_PAGES_URL || 
+                (typeof window !== 'undefined' ? window.location.origin : 'https://bzone.pages.dev');
 
 const articleData = computed(() => {
   return allArticles.value.find(article => article.slug === props.slug);

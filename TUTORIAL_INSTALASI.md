@@ -286,6 +286,7 @@ Untuk generate artikel, Anda perlu memasukkan keywords. Ada **2 cara** untuk men
    ```bash
    git add keyword.txt
    git commit -m "Update keywords"
+   git pull origin main --no-rebase
    git push origin main
    ```
 
@@ -295,6 +296,24 @@ Untuk generate artikel, Anda perlu memasukkan keywords. Ada **2 cara** untuk men
 - ✅ Lebih mudah update (edit file → commit → push)
 - ✅ Version control (bisa lihat history perubahan)
 - ✅ Tidak perlu akses Cloudflare dashboard untuk update
+
+**💡 Multiple Projects dengan Keywords Berbeda:**
+
+Jika Anda punya multiple projects dan ingin keywords berbeda per project:
+
+1. **Buat keyword files terpisah:**
+   - `keyword-production.txt` - Untuk project production
+   - `keyword-staging.txt` - Untuk project staging
+   - `keyword-blog-tech.txt` - Untuk project blog-tech
+   - dll.
+
+2. **Set environment variable `PROJECT_NAME` di setiap project:**
+   - Project production: `PROJECT_NAME = production` → akan menggunakan `keyword-production.txt`
+   - Project staging: `PROJECT_NAME = staging` → akan menggunakan `keyword-staging.txt`
+
+3. **Script akan otomatis membaca file yang sesuai!**
+
+**Lihat `KEYWORDS_MULTIPLE_PROJECTS.md` untuk panduan lengkap.**
 
 ### **Cara 2: Simpan di Cloudflare Environment Variable**
 
@@ -335,9 +354,98 @@ KEYWORDS = how to make pink food color,how to make crystal with borax,how to mea
 3. Proses build biasanya memakan waktu 3-5 menit
 4. Anda bisa melihat progress build di halaman deployment
 
+**💡 Tips:**
+- ✅ **Browser TIDAK perlu selalu terbuka** - Build berjalan di background di Cloudflare server
+- ✅ **Bisa tutup browser/tab** - Proses tidak akan terhenti
+- ✅ **Cek status kapan saja** - Buka dashboard untuk melihat progress
+- ✅ **Setup email notifications** - Dapat email saat build selesai/gagal (Settings → Notifications)
+
+**Lihat `FAQ_DEPLOYMENT.md` untuk FAQ lengkap tentang deployment.**
+
 ---
 
 ## ⚙️ Konfigurasi Build Settings Lanjutan
+
+### Multiple Projects dari Satu Repository
+
+**✅ Ya, 1 repository GitHub bisa digunakan untuk membuat beberapa project di Cloudflare Pages!**
+
+Ini sangat berguna jika Anda ingin:
+- Membuat beberapa website dari codebase yang sama
+- Menggunakan branch berbeda untuk environment berbeda (staging, production)
+- Menggunakan subdirectory berbeda untuk project berbeda
+- Menggunakan konfigurasi build yang berbeda
+
+#### Cara Setup Multiple Projects:
+
+**Contoh 1: Project Berbeda dengan Branch Berbeda**
+
+1. Buat branch baru di GitHub:
+   ```bash
+   git checkout -b staging
+   git push origin staging
+   ```
+
+2. Di Cloudflare Pages, buat project baru:
+   - **Project name**: `bzone-staging`
+   - **Production branch**: `staging`
+   - **Build command**: `npm install && npm run build`
+   - **Build output directory**: `dist`
+   - **Root directory**: `/`
+
+3. Set environment variables yang berbeda untuk project staging
+
+**Contoh 2: Project Berbeda dengan Root Directory Berbeda**
+
+Jika Anda punya struktur folder seperti:
+```
+repository/
+  ├── project-a/
+  │   ├── package.json
+  │   └── ...
+  ├── project-b/
+  │   ├── package.json
+  │   └── ...
+  └── ...
+```
+
+1. Buat project pertama:
+   - **Project name**: `project-a`
+   - **Root directory**: `/project-a`
+   - **Build command**: `npm install && npm run build`
+   - **Build output directory**: `dist`
+
+2. Buat project kedua:
+   - **Project name**: `project-b`
+   - **Root directory**: `/project-b`
+   - **Build command**: `npm install && npm run build`
+   - **Build output directory**: `dist`
+
+**Contoh 3: Project Berbeda dengan Environment Variables Berbeda**
+
+Setiap project bisa memiliki environment variables sendiri:
+
+- **Project 1** (`bzone-production`):
+  - `GEMINI_API_KEY` = key1
+  - `KEYWORDS` = keywords untuk production
+  - Custom domain: `blog.example.com`
+
+- **Project 2** (`bzone-staging`):
+  - `GEMINI_API_KEY` = key2 (atau sama)
+  - `KEYWORDS` = keywords untuk testing
+  - Custom domain: `staging-blog.example.com`
+
+**Keuntungan Multiple Projects:**
+- ✅ Satu repository, multiple deployments
+- ✅ Environment variables terpisah per project
+- ✅ Custom domain berbeda per project
+- ✅ Build settings berbeda per project
+- ✅ Preview deployments untuk setiap project
+
+**Catatan:**
+- Setiap project akan memiliki URL Cloudflare Pages sendiri: `project-name.pages.dev`
+- Setiap project bisa memiliki custom domain sendiri
+- Environment variables di-set per project (tidak shared antar project)
 
 ### Custom Domain (Opsional)
 

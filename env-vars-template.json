@@ -1,0 +1,12 @@
+{
+  "GEMINI_API_KEY": "AIzaSy...your_api_key_here",
+  "PEXELS_API_KEY": "your_pexels_api_key_here",
+  "BACKDATE_DAYS": "3",
+  "FUTURE_SCHEDULE_DAYS": "30",
+  "NODE_VERSION": "20",
+  "VITE_SITE_NAME": "Blog",
+  "VITE_SITE_URL": "https://bzone.pages.dev",
+  "VITE_OG_TITLE": "Blog",
+  "VITE_OG_DESCRIPTION": "Blog Description"
+}
+

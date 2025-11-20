@@ -4,7 +4,13 @@ import path from 'path';
 
 const DIST_PATH = path.resolve(process.cwd(), 'dist');
 const ARTICLES_PATH = path.resolve(process.cwd(), 'public/articles.json');
-const SITE_URL = process.env.VITE_SITE_URL || 'https://www.kontenkit.com';
+
+// Priority: VITE_SITE_URL > CF_PAGES_URL > CF_PAGES_BRANCH_URL > default
+// CF_PAGES_URL adalah URL otomatis dari Cloudflare Pages (contoh: https://bzone.pages.dev)
+const SITE_URL = process.env.VITE_SITE_URL || 
+                 process.env.CF_PAGES_URL || 
+                 process.env.CF_PAGES_BRANCH_URL || 
+                 'https://bzone.pages.dev';
 
 const todayISO = new Date().toISOString().split('T')[0];
 
