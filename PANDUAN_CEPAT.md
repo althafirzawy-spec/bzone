@@ -34,7 +34,7 @@ Di halaman project Cloudflare Pages → **Settings** → **Environment variables
 | `PEXELS_API_KEY` | (dari `pexels_apikey.txt`) | Production, Preview |
 | `BACKDATE_DAYS` | `3` | Production, Preview |
 | `FUTURE_SCHEDULE_DAYS` | `30` | Production, Preview |
-| `NODE_VERSION` | `18` | Production, Preview |
+| `NODE_VERSION` | `20` | Production, Preview |
 
 ### ✅ 4. Deploy!
 
@@ -49,7 +49,7 @@ Website Anda akan live di: `https://bzone.pages.dev`
 ### Build gagal?
 - ✅ Cek environment variables sudah diset
 - ✅ Cek build logs untuk error detail
-- ✅ Pastikan Node.js version = 18
+- ✅ Pastikan Node.js version = 20 (wajib untuk cheerio)
 
 ### API key error?
 - ✅ Pastikan `GEMINI_API_KEY` format benar (mulai dengan `AIzaSy`)

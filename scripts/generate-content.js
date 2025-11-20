@@ -274,9 +274,19 @@ async function main() {
       }
     }
     
-    const apiKeys = rawApiKeyContent.split('\n').filter(key => key.trim().startsWith("AIzaSy"));
+    // Support multiple API keys dengan pemisah newline (\n) atau koma (,)
+    // Contoh: "key1,key2" atau "key1\nkey2" atau "key1, key2"
+    let apiKeys = [];
+    if (rawApiKeyContent.includes(',')) {
+      // Jika ada koma, split berdasarkan koma
+      apiKeys = rawApiKeyContent.split(',').map(key => key.trim()).filter(key => key.startsWith("AIzaSy"));
+    } else {
+      // Jika tidak ada koma, split berdasarkan newline (untuk file atau multi-line env var)
+      apiKeys = rawApiKeyContent.split('\n').map(key => key.trim()).filter(key => key.startsWith("AIzaSy"));
+    }
+    
     if (apiKeys.length === 0) {
-      // Jika dari env var, coba langsung pakai value-nya
+      // Jika tidak ada yang valid setelah split, coba langsung pakai value-nya (single key)
       const envKey = process.env.GEMINI_API_KEY?.trim();
       if (envKey && envKey.startsWith("AIzaSy")) {
         apiKeys.push(envKey);
@@ -284,6 +294,8 @@ async function main() {
         throw new Error("Tidak ada kunci API valid. Pastikan GEMINI_API_KEY valid atau apikey.txt berisi API key yang valid.");
       }
     }
+    
+    console.log(`[INFO] Ditemukan ${apiKeys.length} API key(s) untuk digunakan.`);
     
     // Baca Pexels API key dari environment variable atau file
     let pexelsApiKey = null;

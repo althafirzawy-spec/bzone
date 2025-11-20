@@ -2,9 +2,13 @@ import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import path from 'path';
 import fs from 'fs';
-import ssg from 'vite-plugin-ssr-ssg';
+// Fix: Import ssg dengan cara yang kompatibel
+import ssgPlugin from 'vite-plugin-ssr-ssg';
 // PERBAIKAN: Impor sebagai default export (tanpa kurung kurawal)
 import javascriptObfuscator from 'vite-plugin-javascript-obfuscator';
+
+// Handle default export untuk ssg
+const ssg = ssgPlugin.default || ssgPlugin;
 
 let articleRoutes = [];
 try {

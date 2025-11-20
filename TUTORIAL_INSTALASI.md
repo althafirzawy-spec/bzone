@@ -17,7 +17,7 @@
 Pastikan Anda sudah memiliki:
 - ✅ Akun GitHub (gratis)
 - ✅ Akun Cloudflare (gratis)
-- ✅ Node.js versi 18 atau lebih tinggi terinstall di komputer lokal
+- ✅ Node.js versi 20 atau lebih tinggi terinstall di komputer lokal (wajib >= 20.18.1 untuk cheerio)
 - ✅ Git terinstall di komputer lokal
 - ✅ API Key Google Gemini (dari `apikey.txt`)
 - ✅ API Key Pexels (dari `pexels_apikey.txt`)
@@ -59,14 +59,68 @@ git add .
 
 # Buat commit pertama
 git commit -m "Initial commit: Vue 3 blog dengan SSG"
+```
 
+**💡 Tips: Jika Muncul Dialog CredentialHelperSelector**
+
+Saat pertama kali commit, Windows mungkin menampilkan dialog **CredentialHelperSelector**. Pilih salah satu:
+
+- ✅ **Git Credential Manager** (RECOMMENDED) - Menyimpan credentials dengan aman, tidak perlu input username/password setiap push
+- ✅ **Git Credential Manager Core** - Alternatif yang juga bagus
+- ⚠️ **None / No helper** - Hanya pilih ini jika Anda ingin input credentials manual setiap kali
+
+**Rekomendasi**: Pilih **"Git Credential Manager"** untuk kemudahan penggunaan.
+
+### Langkah 3: Setup Authentication untuk Push ke GitHub
+
+**🔐 Jika Signup GitHub Pakai SSO Gmail (Tidak Ada Password)**
+
+Jika Anda signup GitHub menggunakan SSO Gmail, Anda tidak punya password. Gunakan **Personal Access Token (PAT)** sebagai pengganti password.
+
+#### Cara Membuat Personal Access Token:
+
+1. **Login ke GitHub** → Klik foto profil (pojok kanan atas) → **Settings**
+2. Scroll ke bawah → **Developer settings** (di sidebar kiri)
+3. Klik **Personal access tokens** → **Tokens (classic)**
+4. Klik **Generate new token** → **Generate new token (classic)**
+5. Isi form:
+   - **Note**: `Git Push Access` (atau nama lain)
+   - **Expiration**: Pilih durasi (90 days, atau No expiration)
+   - **Scopes**: Centang **`repo`** (akan otomatis centang semua sub-options)
+6. Klik **Generate token** di bagian bawah
+7. **⚠️ PENTING**: Copy token yang muncul (contoh: `ghp_xxxxxxxxxxxxxxxxxxxx`)
+   - Token hanya muncul sekali! Simpan dengan aman.
+   - **JANGAN** commit token ke GitHub! Token harus tetap rahasia.
+
+#### Cara Menggunakan Token:
+
+Saat melakukan `git push`, Git akan meminta:
+- **Username**: Masukkan username GitHub Anda (contoh: `althafirzawy-spec`)
+- **Password**: **JANGAN masukkan password**, tapi **paste Personal Access Token** yang sudah dibuat
+
+```bash
 # Tambahkan remote repository GitHub
+# Ganti USERNAME dengan username GitHub Anda (contoh: althafirzawy-spec)
 git remote add origin https://github.com/USERNAME/bzone.git
-# Ganti USERNAME dengan username GitHub Anda
 
 # Push ke GitHub
 git branch -M main
 git push -u origin main
+```
+
+**Saat diminta credentials:**
+- **Username**: `althafirzawy-spec` (username GitHub Anda)
+- **Password**: `ghp_xxxxxxxxxxxxxxxxxxxx` (Personal Access Token, BUKAN password)
+
+Git Credential Manager akan menyimpan token ini, jadi Anda tidak perlu input lagi di push berikutnya.
+
+**💡 Alternatif: Gunakan SSH (Lebih Aman)**
+
+Jika ingin lebih aman, bisa setup SSH key:
+1. Generate SSH key: `ssh-keygen -t ed25519 -C "your_email@example.com"`
+2. Copy public key: `cat ~/.ssh/id_ed25519.pub`
+3. Tambahkan ke GitHub: Settings → SSH and GPG keys → New SSH key
+4. Ubah remote URL: `git remote set-url origin git@github.com:USERNAME/bzone.git`
 ```
 
 **⚠️ PENTING: Jangan Push File Sensitif!**
@@ -175,12 +229,40 @@ Klik **"Add variable"** dan tambahkan variabel berikut:
 | `PEXELS_API_KEY` | (isi dengan API key dari `pexels_apikey.txt`) | Production, Preview |
 | `BACKDATE_DAYS` | `3` | Production, Preview |
 | `FUTURE_SCHEDULE_DAYS` | `30` | Production, Preview |
-| `NODE_VERSION` | `18` | Production, Preview |
+| `NODE_VERSION` | `20` | Production, Preview |
+
+**💡 Format GEMINI_API_KEY untuk Multiple Keys:**
+
+Jika Anda memiliki **beberapa API keys** (untuk menghindari rate limit), Anda bisa memasukkan semuanya dengan format:
+
+**Format 1: Dipisah dengan koma (RECOMMENDED untuk Cloudflare)**
+```
+AIzaSy...key1,AIzaSy...key2,AIzaSy...key3
+```
+
+**Format 2: Dipisah dengan koma dan spasi**
+```
+AIzaSy...key1, AIzaSy...key2, AIzaSy...key3
+```
+
+**Format 3: Satu key per baris (untuk file lokal)**
+```
+AIzaSy...key1
+AIzaSy...key2
+AIzaSy...key3
+```
+
+**Contoh di Cloudflare Environment Variable:**
+```
+GEMINI_API_KEY = AIzaSy1234567890abcdef,AIzaSy0987654321fedcba
+```
+
+Script akan otomatis mendeteksi dan menggunakan semua keys secara bergantian jika salah satu mencapai rate limit.
 
 **Cara menambahkan:**
 1. Klik **"Add variable"**
 2. Masukkan **Variable name** (misal: `GEMINI_API_KEY`)
-3. Masukkan **Value** (paste API key Anda)
+3. Masukkan **Value** (paste API key Anda, atau multiple keys dipisah koma)
 4. Centang **Production** dan **Preview**
 5. Klik **"Save"**
 6. Ulangi untuk semua variabel
@@ -220,7 +302,7 @@ Jika ingin setup untuk development/preview:
    - **Build command**: `npm install && npm run build`
    - **Build output directory**: `dist`
    - **Root directory**: `/`
-   - **Node.js version**: `18` atau `20`
+   - **Node.js version**: `20` (wajib, karena cheerio memerlukan Node.js >= 20.18.1)
 
 ---
 
@@ -271,19 +353,37 @@ Karena script `generate-content.js` memerlukan API keys, pastikan:
 
 ## 🔧 Troubleshooting
 
-### Problem 1: Build Gagal - "Cannot find module"
+### Problem 1: Build Gagal - "Cannot find module" atau "Unsupported engine"
 
-**Solusi:**
-```bash
-# Pastikan package.json ada dan dependencies lengkap
-# Di local, jalankan:
-npm install
-npm run build
+**Error yang muncul:**
+```
+npm warn EBADENGINE package: 'cheerio@1.1.2', required: { node: '>=20.18.1' }
+SyntaxError: Cannot use import statement outside a module
 ```
 
+**Solusi:**
+
+1. **Pastikan Node.js Version = 20:**
+   - File `.nvmrc` dan `.node-version` sudah dibuat dengan value `20`
+   - Atau set environment variable `NODE_VERSION = 20` di Cloudflare Pages
+   - Cloudflare akan otomatis menggunakan Node.js 20 jika file `.nvmrc` ada
+
+2. **Verifikasi di Cloudflare:**
+   - Buka Cloudflare Pages → Project → Settings → Environment variables
+   - Pastikan `NODE_VERSION = 20` sudah diset
+   - Atau pastikan file `.nvmrc` dengan value `20` sudah di-commit ke GitHub
+
+3. **Test build lokal:**
+   ```bash
+   # Pastikan package.json ada dan dependencies lengkap
+   npm install
+   npm run build
+   ```
+
 Jika build lokal berhasil tapi di Cloudflare gagal, pastikan:
-- Node.js version di Cloudflare sesuai (18 atau 20)
+- Node.js version di Cloudflare = 20 (wajib, karena cheerio memerlukan >= 20.18.1)
 - Semua dependencies ada di `package.json` (bukan hanya `devDependencies`)
+- File `.nvmrc` atau `.node-version` sudah di-commit ke GitHub
 
 ### Problem 2: Build Gagal - "API Key not found"
 
