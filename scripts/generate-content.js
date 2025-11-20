@@ -238,6 +238,9 @@ async function processNewKeywords(keywordsToGenerate, apiKeyManager, pexelsApiKe
             const imageUrl = await fetchImageFromPexels(keyword, pexelsApiKey);
             jsonResult.imageUrl = imageUrl;
 
+            // Simpan keyword asli untuk tracking (mencegah duplikasi)
+            jsonResult.originalKeyword = keyword;
+
             allArticles.push(jsonResult);
             console.log(` -> [SUCCESS] Artikel unik untuk "${keyword}" telah selesai.`);
 
@@ -426,9 +429,30 @@ async function main() {
 
     const apiKeyManager = new ApiKeyManager(apiKeys);
 
-    const createSlug = (text = '') => text.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
-    const existingSlugs = new Set(allArticles.map(article => article.slug));
-    const keywordsToGenerate = keywords.filter(keyword => !existingSlugs.has(createSlug(keyword)));
+    // Cek keyword yang sudah diproses berdasarkan originalKeyword yang disimpan
+    // Fallback ke slug jika originalKeyword tidak ada (untuk backward compatibility)
+    const existingKeywords = new Set(
+      allArticles
+        .map(article => article.originalKeyword || article.slug)
+        .filter(k => k) // Filter null/undefined
+    );
+    
+    // Normalize keyword untuk comparison (lowercase, trim)
+    const normalizeKeyword = (keyword) => keyword.toLowerCase().trim();
+    
+    // Filter keyword yang belum diproses
+    const keywordsToGenerate = keywords.filter(keyword => {
+      const normalized = normalizeKeyword(keyword);
+      // Cek apakah keyword sudah ada (case-insensitive)
+      return !Array.from(existingKeywords).some(existing => 
+        normalizeKeyword(existing) === normalized
+      );
+    });
+    
+    if (keywordsToGenerate.length < keywords.length) {
+      const skippedCount = keywords.length - keywordsToGenerate.length;
+      console.log(`[INFO] ${skippedCount} keyword(s) sudah diproses sebelumnya dan akan dilewati.`);
+    }
 
     if (keywordsToGenerate.length > 0) {
       await processNewKeywords(keywordsToGenerate, apiKeyManager, pexelsApiKey, allArticles);
