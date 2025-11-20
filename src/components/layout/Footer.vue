@@ -13,7 +13,9 @@
 </template>
 
 <script setup>
-const siteName = import.meta.env.VITE_SITE_NAME || 'KontenKit';
+import { useSiteName } from '@/composables/useSiteName.js';
+
+const { siteName } = useSiteName();
 </script>
 
 <style scoped>

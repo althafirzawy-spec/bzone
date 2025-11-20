@@ -45,8 +45,10 @@ onMounted(() => {
   fetchArticles();
 });
 
+import { useSiteName } from '@/composables/useSiteName.js';
+
 const route = useRoute();
-const siteName = import.meta.env.VITE_SITE_NAME || 'KontenKit';
+const { siteName } = useSiteName();
 // Priority: VITE_SITE_URL > CF_PAGES_URL > default Cloudflare Pages URL
 const siteUrl = import.meta.env.VITE_SITE_URL || 
                 import.meta.env.CF_PAGES_URL || 

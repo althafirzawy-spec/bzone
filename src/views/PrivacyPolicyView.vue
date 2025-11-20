@@ -57,8 +57,9 @@
 <script setup>
 import { computed } from 'vue';
 import { useHead } from '@unhead/vue';
+import { useSiteName } from '@/composables/useSiteName.js';
 
-const siteName = import.meta.env.VITE_SITE_NAME;
+const { siteName } = useSiteName();
 const siteUrl = import.meta.env.VITE_SITE_URL;
 
 const lastUpdated = computed(() => {

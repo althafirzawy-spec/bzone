@@ -55,9 +55,10 @@ import { useRoute } from 'vue-router';
 import ThemeToggle from '@/components/ui/ThemeToggle.vue';
 import ThemeSelector from '@/components/ui/ThemeSelector.vue';
 import { useSearch } from '@/composables/useSearch';
+import { useSiteName } from '@/composables/useSiteName.js';
 
 const { openSearch } = useSearch();
-const siteName = import.meta.env.VITE_SITE_NAME || 'KontenKit';
+const { siteName } = useSiteName();
 const isMobileMenuOpen = ref(false);
 const route = useRoute();
 
