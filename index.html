@@ -81,5 +81,151 @@
         });
       })();
     </script>
+
+    <!-- Universal Popunder Blocker: Block semua popunder berdasarkan behavior, bukan domain spesifik -->
+    <script>
+      (function() {
+        'use strict';
+        
+        // Pattern URL yang mencurigakan (popunder biasanya punya pattern ini, tidak peduli domain)
+        const suspiciousPatterns = [
+          /\/api\/users\?token=/i,        // Pattern seperti /api/users?token= (contoh: wayfarerorthodox.com)
+          /token=[^&]{50,}/i,             // URL dengan token parameter sangat panjang (>50 chars)
+          /token=.*&referer=/i,           // URL dengan token dan referer
+          /referer=.*&.*&.*&/i,          // URL dengan banyak parameter (3+ &)
+          /uuid=[a-f0-9-]{36}/i,          // URL dengan UUID
+          /shu=[a-f0-9]{100,}/i,          // URL dengan hash panjang (seperti di contoh Anda)
+          /\?.*&.*&.*&.*&.*&/i,          // URL dengan 5+ parameter (sangat mencurigakan)
+        ];
+        
+        // Track user interaction
+        let userInteracted = false;
+        let lastInteractionTime = 0;
+        let interactionTimeout;
+        let windowBlurred = false;
+        
+        function markUserInteraction() {
+          userInteracted = true;
+          lastInteractionTime = Date.now();
+          clearTimeout(interactionTimeout);
+          // Reset setelah 2 detik (window untuk legitimate popup)
+          interactionTimeout = setTimeout(() => {
+            userInteracted = false;
+          }, 2000);
+        }
+        
+        // Track user interaction events
+        ['click', 'keydown', 'touchstart', 'mousedown'].forEach(event => {
+          document.addEventListener(event, markUserInteraction, { passive: true });
+        });
+        
+        // Track window blur (popunder technique)
+        window.addEventListener('blur', () => {
+          windowBlurred = true;
+          setTimeout(() => {
+            windowBlurred = false;
+          }, 100);
+        }, { passive: true });
+        
+        // Block window.open() untuk popunder - LOGIKA UTAMA
+        const originalOpen = window.open;
+        window.open = function(url, target, features) {
+          // 1. Block jika tidak ada user interaction (popunder behavior utama)
+          if (!userInteracted) {
+            console.warn('🚫 Blocked popunder (no user interaction):', url);
+            return null;
+          }
+          
+          // 2. Block jika URL mencurigakan (pattern matching - tidak peduli domain)
+          if (url && suspiciousPatterns.some(pattern => pattern.test(url))) {
+            console.warn('🚫 Blocked popunder (suspicious URL pattern):', url);
+            return null;
+          }
+          
+          // 3. Block jika di-trigger saat window blur (popunder technique)
+          if (windowBlurred && !userInteracted) {
+            console.warn('🚫 Blocked popunder (triggered during blur):', url);
+            return null;
+          }
+          
+          // 4. Block jika di-trigger terlalu lama setelah interaction (>2 detik)
+          const timeSinceInteraction = Date.now() - lastInteractionTime;
+          if (timeSinceInteraction > 2000) {
+            console.warn('🚫 Blocked popunder (too long after interaction):', url);
+            return null;
+          }
+          
+          // 5. Block jika URL sangat panjang dengan banyak parameter (popunder signature)
+          if (url && url.length > 500 && (url.match(/&/g) || []).length > 10) {
+            console.warn('🚫 Blocked popunder (suspicious long URL with many params):', url.substring(0, 100) + '...');
+            return null;
+          }
+          
+          // Allow legitimate popup (melewati semua check di atas)
+          return originalOpen.apply(this, arguments);
+        };
+        
+        // Block navigation ke URL mencurigakan
+        try {
+          const locationDescriptor = Object.getOwnPropertyDescriptor(window, 'location');
+          if (locationDescriptor && locationDescriptor.set) {
+            Object.defineProperty(window, 'location', {
+              set: function(url) {
+                if (url && suspiciousPatterns.some(pattern => pattern.test(url))) {
+                  console.warn('🚫 Blocked navigation to suspicious URL:', url);
+                  return;
+                }
+                locationDescriptor.set.call(window, url);
+              },
+              get: function() {
+                return window.location;
+              },
+              configurable: true
+            });
+          }
+        } catch (e) {
+          // Fallback jika tidak bisa override location
+          console.warn('Could not override window.location:', e);
+        }
+        
+        // Monitor dan block script injection yang mencurigakan
+        const observer = new MutationObserver((mutations) => {
+          mutations.forEach((mutation) => {
+            mutation.addedNodes.forEach((node) => {
+              if (node.nodeName === 'SCRIPT') {
+                const src = node.src || '';
+                const content = node.textContent || '';
+                
+                // Block script dengan URL mencurigakan
+                if (suspiciousPatterns.some(pattern => 
+                  pattern.test(src) || pattern.test(content)
+                )) {
+                  console.warn('🚫 Blocked suspicious script injection:', src || 'inline script');
+                  node.remove();
+                  return;
+                }
+                
+                // Block script yang mengandung window.open tanpa proper checks
+                if (content.includes('window.open') && 
+                    !content.includes('userInteracted') && 
+                    !content.includes('addEventListener') &&
+                    !content.includes('click') &&
+                    !content.includes('onclick')) {
+                  console.warn('🚫 Blocked script with potential popunder code');
+                  node.remove();
+                }
+              }
+            });
+          });
+        });
+        
+        observer.observe(document.documentElement, {
+          childList: true,
+          subtree: true
+        });
+        
+        console.log('🛡️ Universal popunder blocker active - Blocking based on behavior patterns (not domain-specific)');
+      })();
+    </script>
   </body>
 </html>
