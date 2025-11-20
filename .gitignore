@@ -18,6 +18,8 @@ build/
 .env.production.local
 env-vars-*.json
 !env-vars-template.json
+api-keys-config.json
+!api-keys-config.example.json
 
 # API Keys dan file sensitif
 apikey.txt

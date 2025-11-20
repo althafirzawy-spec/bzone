@@ -1,0 +1,16 @@
+{
+  "apiKeys": {
+    "GEMINI_API_KEY": "AIzaSy...your_api_key_here",
+    "PEXELS_API_KEY": "your_pexels_api_key_here",
+    "BACKDATE_DAYS": "3",
+    "FUTURE_SCHEDULE_DAYS": "30",
+    "NODE_VERSION": "20"
+  },
+  "projects": [
+    "bzone",
+    "bzone-staging",
+    "blog-tech",
+    "blog-food"
+  ]
+}
+
