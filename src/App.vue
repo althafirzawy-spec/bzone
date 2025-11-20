@@ -19,9 +19,11 @@ import AdRenderer from '@/components/ads/AdRenderer.vue';
 import { useSearch } from '@/composables/useSearch';
 import { adSlots } from '@/adConfig.js';
 import { useTheme } from '@/composables/useTheme.js';
+import { useColorTheme } from '@/composables/useColorTheme.js';
 
 useSearch();
 useTheme();
+useColorTheme(); // Initialize color theme
 
 const showFloatingAd = async () => {
   try {

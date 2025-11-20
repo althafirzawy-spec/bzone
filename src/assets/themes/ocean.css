@@ -1,0 +1,33 @@
+:root {
+  --primary-color: #00a8cc;
+  --primary-color-light: rgba(0, 168, 204, 0.1);
+  --text-primary: #1a1a2e;
+  --text-secondary: #5a5a7a;
+  --background-color: #f0f8ff;
+  --card-background: #ffffff;
+  --border-color: #cce7f0;
+  --shadow-color: rgba(0, 168, 204, 0.15);
+
+  --font-family-base: 'Inter', sans-serif;
+  --font-size-base: 1rem;
+  --line-height-base: 1.6;
+
+  --border-radius: 8px;
+  --container-max-width: 1200px;
+
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 2rem;
+}
+
+html.dark {
+  --primary-color: #4dd0e1;
+  --primary-color-light: rgba(77, 208, 225, 0.15);
+  --text-primary: #e0f7fa;
+  --text-secondary: #80deea;
+  --background-color: #0a1929;
+  --card-background: #132f4c;
+  --border-color: #1e3a5f;
+  --shadow-color: rgba(0, 168, 204, 0.3);
+}
+

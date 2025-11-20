@@ -16,6 +16,7 @@
           <button class="icon-button search-button" @click="openSearch" aria-label="Open Search">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="m19.6 21l-6.3-6.3q-.75.6-1.725.95T9.5 16q-2.725 0-4.612-1.888T3 9.5q0-2.725 1.888-4.612T9.5 3q2.725 0 4.612 1.888T16 9.5q0 1.1-.35 2.075T14.7 13.3l6.3 6.3l-1.4 1.4ZM9.5 14q1.875 0 3.188-1.313T14 9.5q0-1.875-1.313-3.188T9.5 5Q7.625 5 6.312 6.313T5 9.5q0 1.875 1.313 3.188T9.5 14Z"/></svg>
           </button>
+          <ThemeSelector />
           <ThemeToggle />
         </div>
       </div>
@@ -37,7 +38,8 @@
         <router-link to="/terms-of-service" @click="closeMobileMenu">Terms of Service</router-link>
         <router-link to="/disclaimer" @click="closeMobileMenu">Disclaimer</router-link>
         <router-link to="/contact" @click="closeMobileMenu">Contact</router-link>
-        <div class="mobile-theme-toggle">
+        <div class="mobile-theme-controls">
+          <ThemeSelector />
           <ThemeToggle />
         </div>
       </nav>
@@ -51,6 +53,7 @@
 import { ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import ThemeToggle from '@/components/ui/ThemeToggle.vue';
+import ThemeSelector from '@/components/ui/ThemeSelector.vue';
 import { useSearch } from '@/composables/useSearch';
 
 const { openSearch } = useSearch();
@@ -174,12 +177,14 @@ watch(() => route.path, () => {
 .mobile-nav a.router-link-exact-active {
   color: var(--primary-color);
 }
-.mobile-theme-toggle {
+.mobile-theme-controls {
   margin-top: 2rem;
   padding-top: 1rem;
   border-top: 1px solid var(--border-color);
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: stretch;
 }
 .overlay {
   position: fixed;
