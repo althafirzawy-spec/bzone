@@ -10,6 +10,25 @@ import javascriptObfuscator from 'vite-plugin-javascript-obfuscator';
 // Handle default export untuk ssg
 const ssg = ssgPlugin.default || ssgPlugin;
 
+// Plugin untuk replace HTML placeholders dengan env vars
+function htmlEnvReplace() {
+  return {
+    name: 'html-env-replace',
+    transformIndexHtml(html) {
+      const siteName = process.env.VITE_SITE_NAME || 'Blog';
+      const siteUrl = process.env.VITE_SITE_URL || process.env.CF_PAGES_URL || 'https://bzone.pages.dev';
+      const ogTitle = process.env.VITE_OG_TITLE || siteName;
+      const ogDescription = process.env.VITE_OG_DESCRIPTION || 'Blog Description';
+      
+      return html
+        .replace(/\{\{VITE_SITE_NAME\}\}/g, siteName)
+        .replace(/\{\{VITE_SITE_URL\}\}/g, siteUrl)
+        .replace(/\{\{VITE_OG_TITLE\}\}/g, ogTitle)
+        .replace(/\{\{VITE_OG_DESCRIPTION\}\}/g, ogDescription);
+    }
+  };
+}
+
 let articleRoutes = [];
 try {
   const articlesData = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'public/articles.json'), 'utf-8'));
@@ -20,6 +39,7 @@ try {
 
 export default defineConfig({
   plugins: [
+    htmlEnvReplace(),
     vue(),
     ssg({
       entry: 'src/main.js',

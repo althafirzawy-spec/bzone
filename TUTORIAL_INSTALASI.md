@@ -230,6 +230,10 @@ Klik **"Add variable"** dan tambahkan variabel berikut:
 | `BACKDATE_DAYS` | `3` | Production, Preview |
 | `FUTURE_SCHEDULE_DAYS` | `30` | Production, Preview |
 | `NODE_VERSION` | `20` | Production, Preview |
+| `VITE_SITE_NAME` | `Blog` (opsional) | Production, Preview |
+| `VITE_SITE_URL` | `https://bzone.pages.dev` (opsional) | Production, Preview |
+| `VITE_OG_TITLE` | `Blog` (opsional) | Production, Preview |
+| `VITE_OG_DESCRIPTION` | `Blog Description` (opsional) | Production, Preview |
 
 **💡 Format GEMINI_API_KEY untuk Multiple Keys:**
 

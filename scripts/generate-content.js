@@ -277,12 +277,28 @@ async function main() {
     // Support multiple API keys dengan pemisah newline (\n) atau koma (,)
     // Contoh: "key1,key2" atau "key1\nkey2" atau "key1, key2"
     let apiKeys = [];
-    if (rawApiKeyContent.includes(',')) {
+    
+    // Bersihkan content dari karakter yang tidak perlu
+    const cleanedContent = rawApiKeyContent.trim();
+    
+    if (cleanedContent.includes(',')) {
       // Jika ada koma, split berdasarkan koma
-      apiKeys = rawApiKeyContent.split(',').map(key => key.trim()).filter(key => key.startsWith("AIzaSy"));
+      apiKeys = cleanedContent
+        .split(',')
+        .map(key => key.trim())
+        .filter(key => key.length > 0 && key.startsWith("AIzaSy") && key.length > 20); // Validasi panjang minimal
+    } else if (cleanedContent.includes('\n')) {
+      // Jika ada newline, split berdasarkan newline
+      apiKeys = cleanedContent
+        .split('\n')
+        .map(key => key.trim())
+        .filter(key => key.length > 0 && key.startsWith("AIzaSy") && key.length > 20);
     } else {
-      // Jika tidak ada koma, split berdasarkan newline (untuk file atau multi-line env var)
-      apiKeys = rawApiKeyContent.split('\n').map(key => key.trim()).filter(key => key.startsWith("AIzaSy"));
+      // Single key, validasi langsung
+      const singleKey = cleanedContent;
+      if (singleKey.startsWith("AIzaSy") && singleKey.length > 20) {
+        apiKeys.push(singleKey);
+      }
     }
     
     if (apiKeys.length === 0) {

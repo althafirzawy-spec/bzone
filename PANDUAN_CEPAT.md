@@ -8,7 +8,7 @@
 git init
 git add .
 git commit -m "Initial commit"
-git remote add origin https://github.com/USERNAME/bzone.git
+git remote add origin https://github.com/althafirzawy-spec/bzone.git
 git push -u origin main
 ```
 
