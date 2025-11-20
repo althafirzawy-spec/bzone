@@ -9,7 +9,7 @@ export const adSlots = {
     enabled: true,
   },
   underNav: {
-    enabled: false,
+    enabled: true,
   },
   floating: {
     enabled: true,
